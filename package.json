@@ -8,6 +8,6 @@
     "build": "tsc"
   },
   "dependencies": {
-    "nakama-runtime": "^3.37.0"
+    "nakama-runtime": "github:heroiclabs/nakama-common"
   }
 }
