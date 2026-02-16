@@ -43,7 +43,7 @@ const rankedMatch: nkruntime.MatchHandler<MatchState> = {
   }
 };
 
-const InitModule: nkruntime.InitModule = function(ctx, logger, nk, initializer) {
+function InitModule(ctx: nkruntime.Context, logger: nkruntime.Logger, nk: nkruntime.Nakama, initializer: nkruntime.Initializer) {
   initializer.registerMatch("ranked_match", rankedMatch);
   logger.info("Authoritative Match cargado correctamente.");
 };
