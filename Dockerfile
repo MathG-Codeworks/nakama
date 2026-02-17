@@ -15,4 +15,13 @@ COPY local.yml /nakama/data/local.yml
 
 EXPOSE 7349 7350 7351
 
-ENTRYPOINT ["/bin/sh", "-ecx", "/nakama/nakama migrate up --database.address $DATABASE_ADDRESS && exec /nakama/nakama --name nakama1 --database.address $DATABASE_ADDRESS --logger.level DEBUG --session.token_expiry_sec 7200"]
+ENTRYPOINT ["/bin/sh", "-ecx", "\
+  /nakama/nakama migrate up --database.address $DATABASE_ADDRESS && \
+  exec /nakama/nakama \
+  --name nakama1 \
+  --database.address $DATABASE_ADDRESS \
+  --logger.level DEBUG \
+  --socket.address 0.0.0.0 \
+  --socket.port ${PORT} \
+  --session.token_expiry_sec 7200"
+]
