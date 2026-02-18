@@ -3,6 +3,7 @@ FROM node:alpine AS node-builder
 WORKDIR /backend
 
 COPY package*.json .
+RUN apk add --no-cache git
 RUN npm install
 COPY tsconfig.json .
 COPY *.ts .
