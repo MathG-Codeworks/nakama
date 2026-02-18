@@ -46,6 +46,17 @@ function matchLeave(ctx: nkruntime.Context, logger: nkruntime.Logger, nk: nkrunt
 }
 
 function matchLoop(ctx: nkruntime.Context, logger: nkruntime.Logger, nk: nkruntime.Nakama, dispatcher: nkruntime.MatchDispatcher, tick: number, state: nkruntime.MatchState, messages: nkruntime.MatchMessage[]) : { state: nkruntime.MatchState} | null {
+	
+	for (const message of messages) {
+		dispatcher.broadcastMessage(
+			message.opCode,
+			message.data,
+			null,
+			message.sender,
+			true
+		)
+	}
+	
 	return {
 	  state
 	};
