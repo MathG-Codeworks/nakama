@@ -1,19 +1,18 @@
-FROM node:20-alpine AS builder
+FROM node:alpine AS node-builder
 
-WORKDIR /app
-COPY package.json tsconfig.json ./
-RUN apk add --no-cache git
+WORKDIR /backend
+
+COPY package*.json .
 RUN npm install
+COPY tsconfig.json .
+COPY *.ts .
+RUN npx tsc
 
-COPY src ./src
-RUN npm run build
+FROM heroiclabs/nakama:3.37.0
 
-FROM registry.heroiclabs.com/heroiclabs/nakama:3.37.0
-
-COPY --from=builder /app/build /nakama/data/modules
-COPY local.yml /nakama/data/local.yml
+COPY --from=node-builder /backend/build/*.js /nakama/data/modules/build/
+COPY local.yml /nakama/data/
 
 EXPOSE 7349 7350 7351
 
-ENTRYPOINT ["/bin/sh", "-ec", "/nakama/nakama migrate up --database.address $DATABASE_ADDRESS && exec /nakama/nakama --name nakama1 --database.address $DATABASE_ADDRESS --logger.level DEBUG --console.address 0.0.0.0 --console.port $PORT --session.token_expiry_sec 7200"]
-
+ENTRYPOINT ["/bin/sh", "-ecx", "/nakama/nakama migrate up --database.address $DATABASE_ADDRESS && exec /nakama/nakama --config /nakama/data/local.yml --name nakama1 --database.address $DATABASE_ADDRESS --session.token_expiry_sec 7200"]
