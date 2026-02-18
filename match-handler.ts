@@ -51,7 +51,11 @@ function matchLoop(ctx: nkruntime.Context, logger: nkruntime.Logger, nk: nkrunti
 		dispatcher.broadcastMessage(
 			message.opCode,
 			message.data,
+<<<<<<< HEAD
 			null,
+=======
+			[message.sender],
+>>>>>>> a8ac5477fc42a5cfcb504d54546f1e10d25f96b7
 			message.sender,
 			true
 		)
