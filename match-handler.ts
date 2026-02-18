@@ -1,8 +1,12 @@
 function matchInit(ctx: nkruntime.Context, logger: nkruntime.Logger, nk: nkruntime.Nakama, params: {[key: string]: string}) {
-    const matchCode: string = Math.floor(1000 + Math.random() * 9000).toString();
+    const matchCode: string = params.code || Math.floor(1000 + Math.random() * 9000).toString();
+    
+    logger.info('Match initialized with code: %s', matchCode);
 
 	return {
 	  state: {
+		code: matchCode,
+		presences: {},
 		Debug: 'Match initialized with code ' + matchCode
 	  },
 	  tickRate: 5,
@@ -42,8 +46,6 @@ function matchLeave(ctx: nkruntime.Context, logger: nkruntime.Logger, nk: nkrunt
 }
 
 function matchLoop(ctx: nkruntime.Context, logger: nkruntime.Logger, nk: nkruntime.Nakama, dispatcher: nkruntime.MatchDispatcher, tick: number, state: nkruntime.MatchState, messages: nkruntime.MatchMessage[]) : { state: nkruntime.MatchState} | null {
-	logger.debug('Lobby match loop executed');
-  
 	return {
 	  state
 	};

@@ -1,14 +1,3 @@
-function rpcCreateMatch(ctx: nkruntime.Context, logger: nkruntime.Logger, nk: nkruntime.Nakama, payload: string): string {
-    const matchCode = Math.floor(1000 + Math.random() * 9000).toString();
-    const matchId = nk.matchCreate('ranked-match');
-    
-    return JSON.stringify({
-        matchId: matchId,
-        code: matchCode,
-        success: true
-    });
-}
-
 function InitModule(ctx: nkruntime.Context, logger: nkruntime.Logger, nk: nkruntime.Nakama, initializer: nkruntime.Initializer) {
   initializer.registerMatch("ranked-match", {
     matchInit,
@@ -21,6 +10,7 @@ function InitModule(ctx: nkruntime.Context, logger: nkruntime.Logger, nk: nkrunt
   });
 
   initializer.registerRpc("create_match", rpcCreateMatch);
+  initializer.registerRpc("join_match_by_code", rpcJoinMatchByCode);
 
   return null;
 };

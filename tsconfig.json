@@ -1,6 +1,7 @@
 {
     "files": [
         "./match-handler.ts",
+        "./rpc-match.ts",
         "./main.ts",
     ],
     "compilerOptions": {
