@@ -9,8 +9,6 @@ interface PlayerScore {
 
 function matchInit(ctx: nkruntime.Context, logger: nkruntime.Logger, nk: nkruntime.Nakama, params: {[key: string]: string}) {
     const matchCode: string = params.code || Math.floor(1000 + Math.random() * 9000).toString();
-    
-    logger.info('Match initialized with code: %s', matchCode);
 
 	return {
 	  state: {
@@ -36,7 +34,6 @@ function matchJoinAttempt(ctx: nkruntime.Context, logger: nkruntime.Logger, nk: 
 function matchJoin(ctx: nkruntime.Context, logger: nkruntime.Logger, nk: nkruntime.Nakama, dispatcher: nkruntime.MatchDispatcher, tick: number, state: nkruntime.MatchState, presences: nkruntime.Presence[]) : { state: nkruntime.MatchState } | null {
 	presences.forEach(function (presence) {
 	  state.presences[presence.userId] = presence;
-	  logger.debug('%q joined Lobby match', presence.userId);
 
 	  const existingIndex = state.ranking.findIndex((p: PlayerScore) => p.userId === presence.userId);
       if (existingIndex < 0) {
@@ -66,7 +63,6 @@ function matchJoin(ctx: nkruntime.Context, logger: nkruntime.Logger, nk: nkrunti
 function matchLeave(ctx: nkruntime.Context, logger: nkruntime.Logger, nk: nkruntime.Nakama, dispatcher: nkruntime.MatchDispatcher, tick: number, state: nkruntime.MatchState, presences: nkruntime.Presence[]) : { state: nkruntime.MatchState } | null {
 	presences.forEach(function (presence) {
 	  state.presences[presence.userId] = presence;
-	  logger.debug('%q left Lobby match', presence.userId);
 	});
   
 	return {
