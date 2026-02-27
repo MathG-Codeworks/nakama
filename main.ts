@@ -11,6 +11,8 @@ function InitModule(ctx: nkruntime.Context, logger: nkruntime.Logger, nk: nkrunt
 
   initializer.registerRpc("create_match", rpcCreateMatch);
   initializer.registerRpc("join_match_by_code", rpcJoinMatchByCode);
+  initializer.registerRpc("set_player_ready", rpcSetPlayerReady);
+  initializer.registerRpc("set_player_unready", rpcSetPlayerUnready);
 
   return null;
 };
