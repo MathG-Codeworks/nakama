@@ -97,3 +97,44 @@ function rpcSetPlayerUnready(ctx: nkruntime.Context, logger: nkruntime.Logger, n
         });
     }
 }
+
+function rpcSceneLoaded(ctx: nkruntime.Context, logger: nkruntime.Logger, nk: nkruntime.Nakama, payload: string): string {
+    const data = JSON.parse(payload);
+    const matchId = data.matchId;
+    const minigame = data.minigame;
+    
+    if (!matchId) {
+        return JSON.stringify({
+            success: false,
+            error: 'Match ID requerido'
+        });
+    }
+    
+    if (minigame === undefined || minigame === null) {
+        return JSON.stringify({
+            success: false,
+            error: 'Minigame ID requerido'
+        });
+    }
+    
+    try {
+        const signalData = JSON.stringify({
+            action: 'scene_loaded',
+            userId: ctx.userId,
+            username: ctx.username,
+            minigame: minigame
+        });
+        
+        nk.matchSignal(matchId, signalData);
+        
+        return JSON.stringify({
+            success: true,
+            message: 'Escena cargada confirmada'
+        });
+    } catch (error) {
+        return JSON.stringify({
+            success: false,
+            error: 'Error al confirmar carga de escena'
+        });
+    }
+}
