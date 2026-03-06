@@ -3,6 +3,10 @@
         "./match-handler.ts",
         "./rpc-match.ts",
         "./main.ts",
+        "./src/minigames/brinca-brinca.ts",
+        "./src/types/exercise.ts",
+        "./src/types/player-score.ts",
+        "./src/enums/minigames.ts"
     ],
     "compilerOptions": {
         "target": "es5",

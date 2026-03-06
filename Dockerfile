@@ -7,6 +7,7 @@ RUN apk add --no-cache git
 RUN npm install
 COPY tsconfig.json .
 COPY *.ts .
+COPY src/ ./src/
 RUN npx tsc
 
 FROM heroiclabs/nakama:3.37.0

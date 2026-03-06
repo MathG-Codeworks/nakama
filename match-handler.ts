@@ -4,16 +4,7 @@ const UNREADY_OP_CODE = 4;
 const COUNTDOWN_OP_CODE = 5;
 const COUNTDOWN_CANCELLED_OP_CODE = 6;
 const GAME_START_OP_CODE = 7;
-const GAME_LOADED_OP_CODE = 8;
-
-interface PlayerScore {
-    userId: string;
-    username: string;
-    score: number;
-    timestamp: number;
-    ready: boolean;
-    color: string;
-}
+const EXERCISES_LOADED_OP_CODE = 8;
 
 function generatePlayerColor(): string {
     const hue = Math.floor(Math.random() * 360);
@@ -67,11 +58,8 @@ function matchInit(ctx: nkruntime.Context, logger: nkruntime.Logger, nk: nkrunti
 		gameStarted: false,
 		tickRate: 5,
 		lastCountdownTick: 0,
-		scenesLoaded: {} as {[userId: string]: boolean},
 		currentMinigame: null,
-		pendingGameLoadBroadcast: false,
-		gameLoadBroadcastTick: 0,
-		pendingMinigame: null
+		exercises: [] as any[]
 	  },
 	  tickRate: 5,
 	  label: matchCode
@@ -79,8 +67,6 @@ function matchInit(ctx: nkruntime.Context, logger: nkruntime.Logger, nk: nkrunti
 };
 
 function matchJoinAttempt(ctx: nkruntime.Context, logger: nkruntime.Logger, nk: nkruntime.Nakama, dispatcher: nkruntime.MatchDispatcher, tick: number, state: nkruntime.MatchState, presence: nkruntime.Presence, metadata: {[key: string]: any }) : {state: nkruntime.MatchState, accept: boolean, rejectMessage?: string | undefined } | null {
-	logger.debug('%q attempted to join Lobby match', ctx.userId);
-  
 	return {
 	  state,
 	  accept: true
@@ -91,10 +77,10 @@ function matchJoin(ctx: nkruntime.Context, logger: nkruntime.Logger, nk: nkrunti
 	presences.forEach(function (presence) {
 	  state.presences[presence.userId] = presence;
 
-	  const existingIndex = state.ranking.findIndex((p: PlayerScore) => p.userId === presence.userId);
+	  const existingIndex = state.ranking.findIndex((p: PlayerScore) => p.user_id === presence.userId);
       if (existingIndex < 0) {
           state.ranking.push({
-              userId: presence.userId,
+              user_id: presence.userId,
               username: presence.username,
               score: 0,
               timestamp: Date.now(),
@@ -131,26 +117,6 @@ function matchLeave(ctx: nkruntime.Context, logger: nkruntime.Logger, nk: nkrunt
 function matchLoop(ctx: nkruntime.Context, logger: nkruntime.Logger, nk: nkruntime.Nakama, dispatcher: nkruntime.MatchDispatcher, tick: number, state: nkruntime.MatchState, messages: nkruntime.MatchMessage[]) : { state: nkruntime.MatchState} | null {
 	let rankingUpdated = false;
 
-	// Verificar si es momento de enviar el broadcast de game loaded (después del delay)
-	if (state.pendingGameLoadBroadcast && tick >= state.gameLoadBroadcastTick) {
-		dispatcher.broadcastMessage(
-			GAME_LOADED_OP_CODE,
-			nk.stringToBinary(JSON.stringify({ 
-				message: 'All players ready - start minigame!',
-				minigame: state.pendingMinigame
-			})),
-			null,
-			null,
-			true
-		);
-		logger.info('[GAME_LOADED] Broadcast sent for minigame %d after 5 second delay', state.pendingMinigame);
-		
-		state.pendingGameLoadBroadcast = false;
-		state.gameLoadBroadcastTick = 0;
-		state.pendingMinigame = null;
-		state.scenesLoaded = {};
-	}
-
 	if (state.countdownActive && !state.gameStarted) {
 		if (tick - state.lastCountdownTick >= state.tickRate) {
 			state.lastCountdownTick = tick;
@@ -174,13 +140,27 @@ function matchLoop(ctx: nkruntime.Context, logger: nkruntime.Logger, nk: nkrunti
 					null,
 					true
 				);
+
+				state.exercises = getBrincaBrincaExercises();
+				state.currentMinigame = Minigames.BRINCA_BRINCA;
+
+				dispatcher.broadcastMessage(
+					EXERCISES_LOADED_OP_CODE,
+					nk.stringToBinary(JSON.stringify({ 
+						minigame: state.currentMinigame,
+						exercises: exercises
+					})),
+					null,
+					null,
+					true
+				);
 			}
 		}
 	}
 
 	for (const message of messages) {
 		if (message.opCode === READY_OP_CODE) {
-			const existingIndex = state.ranking.findIndex((p: PlayerScore) => p.userId === message.sender.userId);
+			const existingIndex = state.ranking.findIndex((p: PlayerScore) => p.user_id === message.sender.userId);
 			
 			if (existingIndex >= 0) {
 				state.ranking[existingIndex].ready = true;
@@ -196,7 +176,7 @@ function matchLoop(ctx: nkruntime.Context, logger: nkruntime.Logger, nk: nkrunti
 				}
 			}
 		} else if (message.opCode === UNREADY_OP_CODE) {
-			const existingIndex = state.ranking.findIndex((p: PlayerScore) => p.userId === message.sender.userId);
+			const existingIndex = state.ranking.findIndex((p: PlayerScore) => p.user_id === message.sender.userId);
 			
 			if (existingIndex >= 0) {
 				state.ranking[existingIndex].ready = false;
@@ -222,14 +202,14 @@ function matchLoop(ctx: nkruntime.Context, logger: nkruntime.Logger, nk: nkrunti
 		} else if (message.opCode === RANKING_OP_CODE) {
 			try {
 				const payload = JSON.parse(nk.binaryToString(message.data));
-				const existingIndex = state.ranking.findIndex((p: PlayerScore) => p.userId === message.sender.userId);
+				const existingIndex = state.ranking.findIndex((p: PlayerScore) => p.user_id === message.sender.userId);
 
 				if (existingIndex >= 0) {
 					state.ranking[existingIndex].score = payload.score;
 					state.ranking[existingIndex].timestamp = Date.now();
 				} else {
 					state.ranking.push({
-						userId: message.sender.userId,
+						user_id: message.sender.userId,
 						username: message.sender.username,
 						score: payload.score,
 						timestamp: Date.now(),
@@ -275,8 +255,6 @@ function matchLoop(ctx: nkruntime.Context, logger: nkruntime.Logger, nk: nkrunti
 }
 
 function matchTerminate(ctx: nkruntime.Context, logger: nkruntime.Logger, nk: nkruntime.Nakama, dispatcher: nkruntime.MatchDispatcher, tick: number, state: nkruntime.MatchState, graceSeconds: number) : { state: nkruntime.MatchState} | null {
-	logger.debug('Lobby match terminated');
-  
 	return {
 	  state
 	};
@@ -287,7 +265,7 @@ function matchSignal(ctx: nkruntime.Context, logger: nkruntime.Logger, nk: nkrun
 		const signalData = JSON.parse(data);
 		
 		if (signalData.action === 'player_ready') {
-			const existingIndex = state.ranking.findIndex((p: PlayerScore) => p.userId === signalData.userId);
+			const existingIndex = state.ranking.findIndex((p: PlayerScore) => p.user_id === signalData.userId);
 			
 			if (existingIndex >= 0) {
 				state.ranking[existingIndex].ready = true;
@@ -312,7 +290,7 @@ function matchSignal(ctx: nkruntime.Context, logger: nkruntime.Logger, nk: nkrun
 				}
 			}
 		} else if (signalData.action === 'player_unready') {
-			const existingIndex = state.ranking.findIndex((p: PlayerScore) => p.userId === signalData.userId);
+			const existingIndex = state.ranking.findIndex((p: PlayerScore) => p.user_id === signalData.userId);
 			
 			if (existingIndex >= 0) {
 				state.ranking[existingIndex].ready = false;
@@ -341,25 +319,6 @@ function matchSignal(ctx: nkruntime.Context, logger: nkruntime.Logger, nk: nkrun
 						null,
 						true
 					);
-				}
-			}
-		} else if (signalData.action === 'scene_loaded') {
-			const userId = signalData.userId;
-			const minigame = signalData.minigame;
-			
-			if (userId) {
-				state.scenesLoaded[userId] = true;
-				state.currentMinigame = minigame;
-				logger.info('Player %s loaded minigame %d', signalData.username, minigame);
-				
-				const allPresenceIds = Object.keys(state.presences);
-				const allLoaded = allPresenceIds.every(id => state.scenesLoaded[id] === true);
-
-				if (allLoaded && allPresenceIds.length > 0) {
-					const delayTicks = 25;
-					state.pendingGameLoadBroadcast = true;
-					state.gameLoadBroadcastTick = tick + delayTicks;
-					state.pendingMinigame = minigame;
 				}
 			}
 		}

@@ -1,0 +1,8 @@
+interface PlayerScore {
+    user_id: string;
+    username: string;
+    score: number;
+    timestamp: number;
+    ready: boolean;
+    color: string;
+}
