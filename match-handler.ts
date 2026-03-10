@@ -5,6 +5,7 @@ const COUNTDOWN_OP_CODE = 5;
 const COUNTDOWN_CANCELLED_OP_CODE = 6;
 const GAME_START_OP_CODE = 7;
 const EXERCISES_LOADED_OP_CODE = 8;
+const EVALUATE_ANSWER_OP_CODE = 9;
 
 function generatePlayerColor(): string {
     const hue = Math.floor(Math.random() * 360);
@@ -143,12 +144,16 @@ function matchLoop(ctx: nkruntime.Context, logger: nkruntime.Logger, nk: nkrunti
 
 				state.exercises = getBrincaBrincaExercises();
 				state.currentMinigame = Minigames.BRINCA_BRINCA;
+				state.minigameRoundDuration = Brinca.ROUND_DURATION;
+				state.minigameIntermission = Brinca.ROUND_INTERMISSION;
 
 				dispatcher.broadcastMessage(
 					EXERCISES_LOADED_OP_CODE,
 					nk.stringToBinary(JSON.stringify({ 
 						minigame: state.currentMinigame,
-						exercises: exercises
+						exercises: state.exercises,
+						round_duration: state.minigameRoundDuration,
+						round_intermission: state.minigameIntermission,
 					})),
 					null,
 					null,
@@ -201,17 +206,15 @@ function matchLoop(ctx: nkruntime.Context, logger: nkruntime.Logger, nk: nkrunti
 			}
 		} else if (message.opCode === RANKING_OP_CODE) {
 			try {
-				const payload = JSON.parse(nk.binaryToString(message.data));
 				const existingIndex = state.ranking.findIndex((p: PlayerScore) => p.user_id === message.sender.userId);
 
 				if (existingIndex >= 0) {
-					state.ranking[existingIndex].score = payload.score;
 					state.ranking[existingIndex].timestamp = Date.now();
 				} else {
 					state.ranking.push({
 						user_id: message.sender.userId,
 						username: message.sender.username,
-						score: payload.score,
+						score: 0,
 						timestamp: Date.now(),
 						ready: false,
 						color: generatePlayerColor()
@@ -226,6 +229,27 @@ function matchLoop(ctx: nkruntime.Context, logger: nkruntime.Logger, nk: nkrunti
 
 			} catch (error) {
 				logger.error('Error processing score update: %v', error)
+			}
+		} else if (message.opCode === EVALUATE_ANSWER_OP_CODE) {
+			try {
+				const payload = JSON.parse(nk.binaryToString(message.data));
+				const points = evaluateAnswer(state.exercises, payload.operation, payload.answer, state.currentMinigame);
+
+				if (points > 0) {
+					const existingIndex = state.ranking.findIndex((p: PlayerScore) => p.user_id === message.sender.userId);
+					if (existingIndex >= 0) {
+						state.ranking[existingIndex].score += points;
+						state.ranking[existingIndex].timestamp = Date.now();
+						
+						state.ranking.sort((a: PlayerScore, b: PlayerScore) => 
+							b.score - a.score || a.timestamp - b.timestamp
+						);
+						rankingUpdated = true;
+					}
+				}
+
+			} catch (error) {
+				logger.error('Error evaluating answer: %v', error);
 			}
 		} else {
 			dispatcher.broadcastMessage(
