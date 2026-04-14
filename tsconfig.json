@@ -1,5 +1,6 @@
 {
     "files": [
+        "./src/enums/endpoints.ts",
         "./match-handler.ts",
         "./rpc-match.ts",
         "./main.ts",
@@ -7,13 +8,14 @@
         "./src/minigames/brinca-brinca.ts",
         "./src/types/exercise.ts",
         "./src/types/player-score.ts",
-        "./src/enums/minigames.ts"
+        "./src/enums/minigames.ts",
+        "./rpc-auth.ts"
     ],
     "compilerOptions": {
         "target": "es5",
         "lib": ["ES2015"],
         "typeRoots": [
-            "./node_modules"
+            "./node_modules/@types"
         ],
         "outFile": "./build/index.js",
         "strict": true,

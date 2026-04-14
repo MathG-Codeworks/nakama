@@ -1,3 +1,5 @@
+/// <reference types="nakama-runtime" />
+
 const RANKING_OP_CODE = 2;
 const READY_OP_CODE = 3;
 const UNREADY_OP_CODE = 4;

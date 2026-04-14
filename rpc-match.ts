@@ -1,3 +1,5 @@
+/// <reference types="nakama-runtime" />
+
 function rpcCreateMatch(ctx: nkruntime.Context, logger: nkruntime.Logger, nk: nkruntime.Nakama, payload: string): string {
     const matchCode = Math.floor(1000 + Math.random() * 9000).toString();
     const matchId = nk.matchCreate('ranked-match', { code: matchCode });
