@@ -1,15 +1,16 @@
 {
     "files": [
         "./src/enums/endpoints.ts",
+        "./src/enums/minigames.ts",
+        "./src/types/match.ts",
+        "./src/types/exercise.ts",
+        "./src/types/player-score.ts",
         "./match-handler.ts",
         "./rpc-match.ts",
         "./main.ts",
         "./src/minigames/index.ts",
         "./src/minigames/brinca-brinca.ts",
-        "./src/types/exercise.ts",
-        "./src/types/player-score.ts",
-        "./src/enums/minigames.ts",
-        "./rpc-auth.ts"
+        "./rpc-auth.ts",
     ],
     "compilerOptions": {
         "target": "es5",

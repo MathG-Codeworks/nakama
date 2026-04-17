@@ -6,7 +6,6 @@ const PLATFORM = "Movil";
 function rpcCreateSession(ctx: nkruntime.Context, logger: nkruntime.Logger, nk: nkruntime.Nakama, payload: string): string {
     const request = JSON.parse(payload);
     const accessToken: string = request.access_token;
-    const refreshToken: string = request.refresh_token;
     const device_id: string = request.device_id;
 
     try {
@@ -23,29 +22,36 @@ function rpcCreateSession(ctx: nkruntime.Context, logger: nkruntime.Logger, nk: 
             })
         );
 
+        if (response.code === 401) {
+            logger.error("Token expired");
+            return JSON.stringify({
+                ok: false,
+                error: "Token expired",
+                code: 401
+            });
+        }
+
         if (response.code < 200 || response.code >= 300) {
             logger.error("Session creation failed:", response.code);
             return JSON.stringify({
                 ok: false,
-                error: `HTTP ${response.code}`
+                error: `HTTP ${response.code}`,
+                code: response.code
             });
         }
 
-        logger.info(response.body,)
-
         return JSON.stringify({
             ok: true,
-            user: {
-                accessToken: accessToken,
-                refreshToken: refreshToken
-            }
+            body: JSON.parse(response.body),
+            code: 200
         });
     } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
         logger.error("Session creation error:", errorMessage);
         return JSON.stringify({
             ok: false,
-            error: errorMessage
+            error: errorMessage,
+            code: 500
         });
     }
 }
