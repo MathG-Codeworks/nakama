@@ -3,6 +3,8 @@
 function rpcCreateMatch(ctx: nkruntime.Context, logger: nkruntime.Logger, nk: nkruntime.Nakama, payload: string): string {
     const matchCode = Math.floor(1000 + Math.random() * 9000).toString();
     const matchId = nk.matchCreate('ranked-match', { code: matchCode });
+    const accessToken = JSON.parse(payload).accessToken;
+    let createdMatch = null;
 
     try {
         const response = nk.httpRequest(
@@ -18,16 +20,19 @@ function rpcCreateMatch(ctx: nkruntime.Context, logger: nkruntime.Logger, nk: nk
         );
 
         logger.info('Match created: %s', response.body);
-        // return response.body ? JSON.parse(response.body) as Match : null;
+        createdMatch = response.body ? JSON.parse(response.body) as Match : null;
     } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
         logger.error('Error creating match: %s', errorMessage);
     }
+
+    registryJoinMatch(matchId, accessToken, logger, nk);
     
     return JSON.stringify({
         matchId: matchId,
         code: matchCode,
-        success: true
+        success: true,
+        match: createdMatch
     });
 }
 
@@ -52,21 +57,7 @@ function rpcJoinMatchByCode(ctx: nkruntime.Context, logger: nkruntime.Logger, nk
         });
     }
 
-    try {
-        const response = nk.httpRequest(
-            JOIN_MATCH_URL.replace(':id', matches[0].matchId),
-            "post",
-            {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${accessToken}`
-            }
-        );
-
-        logger.info('Match joined: %s', response.body);
-    } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : String(error);
-        logger.error('Error joining match: %s', errorMessage);
-    }
+    registryJoinMatch(matches[0].matchId, accessToken, logger, nk);
     
     return JSON.stringify({
         matchId: matches[0].matchId,
@@ -134,5 +125,23 @@ function rpcSetPlayerUnready(ctx: nkruntime.Context, logger: nkruntime.Logger, n
         return JSON.stringify({
             success: false,
         });
+    }
+}
+
+function registryJoinMatch(matchId: string, accessToken: string, logger: nkruntime.Logger, nk: nkruntime.Nakama) {
+    try {
+        const response = nk.httpRequest(
+            JOIN_MATCH_URL.replace(':id', matchId),
+            "post",
+            {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${accessToken}`
+            }
+        );
+
+        logger.info('Match joined: %s', response.body);
+    } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        logger.error('Error joining match: %s', errorMessage);
     }
 }
