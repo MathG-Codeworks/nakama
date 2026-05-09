@@ -1,4 +1,4 @@
-const API_URL = "https://backend-juco.onrender.com";
+const API_URL = "https://mathg-api-v1.up.railway.app";
 const CREATE_SESSION_URL = API_URL + "/session";
 const REFRESH_URL = API_URL + "/auth/refresh";
 const CREATE_MATCH_URL = API_URL + "/match";
