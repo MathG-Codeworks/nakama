@@ -128,6 +128,70 @@ function rpcSetPlayerUnready(ctx: nkruntime.Context, logger: nkruntime.Logger, n
     }
 }
 
+function rpcSetPlayerReplay(ctx: nkruntime.Context, logger: nkruntime.Logger, nk: nkruntime.Nakama, payload: string): string {
+    const data = JSON.parse(payload);
+    const matchId = data.matchId;
+    
+    if (!matchId) {
+        return JSON.stringify({
+            success: false,
+            error: 'Match ID requerido'
+        });
+    }
+    
+    try {
+        const signalData = JSON.stringify({
+            action: 'player_replay',
+            userId: ctx.userId,
+            username: ctx.username
+        });
+        
+        nk.matchSignal(matchId, signalData);
+        
+        return JSON.stringify({
+            success: true,
+            message: 'Marcado para volver a jugar'
+        });
+    } catch (error) {
+        return JSON.stringify({
+            success: false,
+            error: 'Error al marcar para volver a jugar'
+        });
+    }
+}
+
+function rpcSetPlayerNoReplay(ctx: nkruntime.Context, logger: nkruntime.Logger, nk: nkruntime.Nakama, payload: string): string {
+    const data = JSON.parse(payload);
+    const matchId = data.matchId;
+    
+    if (!matchId) {
+        return JSON.stringify({
+            success: false,
+            error: 'Match ID requerido'
+        });
+    }
+    
+    try {
+        const signalData = JSON.stringify({
+            action: 'player_no_replay',
+            userId: ctx.userId,
+            username: ctx.username
+        });
+        
+        nk.matchSignal(matchId, signalData);
+        
+        return JSON.stringify({
+            success: true,
+            message: 'Desmarcado para volver a jugar'
+        });
+    } catch (error) {
+        return JSON.stringify({
+            success: false,
+            error: 'Error al desmarcar para volver a jugar'
+        });
+    }
+}
+
 function registryJoinMatch(matchId: string, accessToken: string, logger: nkruntime.Logger, nk: nkruntime.Nakama) {
     try {
         const response = nk.httpRequest(

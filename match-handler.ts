@@ -8,6 +8,7 @@ const COUNTDOWN_CANCELLED_OP_CODE = 6;
 const GAME_START_OP_CODE = 7;
 const EXERCISES_LOADED_OP_CODE = 8;
 const EVALUATE_ANSWER_OP_CODE = 9;
+const GAME_REPLAY_OP_CODE = 10;
 
 function generatePlayerColor(): string {
 	const hue = Math.floor(Math.random() * 360);
@@ -88,6 +89,7 @@ function matchJoin(ctx: nkruntime.Context, logger: nkruntime.Logger, nk: nkrunti
 				score: 0,
 				timestamp: Date.now(),
 				ready: false,
+				replay: false,
 				color: generatePlayerColor()
 			});
 		}
@@ -219,6 +221,7 @@ function matchLoop(ctx: nkruntime.Context, logger: nkruntime.Logger, nk: nkrunti
 						score: 0,
 						timestamp: Date.now(),
 						ready: false,
+						replay: false,
 						color: generatePlayerColor()
 					});
 				}
@@ -346,6 +349,52 @@ function matchSignal(ctx: nkruntime.Context, logger: nkruntime.Logger, nk: nkrun
 						true
 					);
 				}
+			}
+		} else if (signalData.action === 'player_replay') {
+			const existingIndex = state.ranking.findIndex((p: PlayerScore) => p.user_id === signalData.userId);
+
+			if (existingIndex >= 0) {
+				state.ranking[existingIndex].replay = true;
+				logger.info('Player %s wants to replay (via signal)', signalData.username);
+
+				const rankingData = JSON.stringify(state.ranking);
+				dispatcher.broadcastMessage(
+					RANKING_OP_CODE,
+					nk.stringToBinary(rankingData),
+					null,
+					null,
+					true
+				);
+
+				const allReplay = state.ranking.every((p: PlayerScore) => p.replay);
+				if (allReplay && state.ranking.length > 0) {
+					state.ranking.forEach((player: PlayerScore) => {
+						player.replay = false;
+					});
+					dispatcher.broadcastMessage(
+						GAME_REPLAY_OP_CODE,
+						nk.stringToBinary(JSON.stringify({ message: 'El juego vuelve a empezar!' })),
+						null,
+						null,
+						true
+					);
+				}
+			}
+		} else if (signalData.action === 'player_no_replay') {
+			const existingIndex = state.ranking.findIndex((p: PlayerScore) => p.user_id === signalData.userId);
+
+			if (existingIndex >= 0) {
+				state.ranking[existingIndex].replay = false;
+				logger.info('Player %s does not want to replay (via signal)', signalData.username);
+
+				const rankingData = JSON.stringify(state.ranking);
+				dispatcher.broadcastMessage(
+					RANKING_OP_CODE,
+					nk.stringToBinary(rankingData),
+					null,
+					null,
+					true
+				);
 			}
 		}
 	} catch (error) {
