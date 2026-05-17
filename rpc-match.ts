@@ -209,3 +209,37 @@ function registryJoinMatch(matchId: string, accessToken: string, logger: nkrunti
         logger.error('Error joining match: %s', errorMessage);
     }
 }
+
+function rpcReplayMatch(ctx: nkruntime.Context, logger: nkruntime.Logger, nk: nkruntime.Nakama, payload: string): string {
+    const data = JSON.parse(payload);
+    const matchId = data.matchId;
+    
+    if (!matchId) {
+        return JSON.stringify({
+            success: false,
+            error: 'Match ID requerido'
+        });
+    }
+
+    try {
+        const signalData = JSON.stringify({
+            action: 'match_replay',
+            userId: ctx.userId,
+            username: ctx.username
+        });
+
+        nk.matchSignal(matchId, signalData);
+
+        return JSON.stringify({
+            success: true,
+            message: 'Marcado para volver a jugar'
+        });
+    } catch (error) {
+        return JSON.stringify({
+            success: false,
+            error: 'Error al intentar jugar de nuevo'
+        });
+    }
+
+
+}

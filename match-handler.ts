@@ -368,9 +368,17 @@ function matchSignal(ctx: nkruntime.Context, logger: nkruntime.Logger, nk: nkrun
 
 				const allReplay = state.ranking.every((p: PlayerScore) => p.replay);
 				if (allReplay && state.ranking.length > 0) {
+					state.gameStarted = false;
+					state.countdownActive = false;
+					state.countdownValue = 5;
+					state.lastCountdownTick = 0;
 					state.ranking.forEach((player: PlayerScore) => {
 						player.replay = false;
+						player.ready = false;
+						player.score = 0;
+						player.timestamp = Date.now();
 					});
+
 					dispatcher.broadcastMessage(
 						GAME_REPLAY_OP_CODE,
 						nk.stringToBinary(JSON.stringify({ message: 'El juego vuelve a empezar!' })),

@@ -18,6 +18,7 @@ function InitModule(ctx: nkruntime.Context, logger: nkruntime.Logger, nk: nkrunt
   initializer.registerRpc("set_player_replay", rpcSetPlayerReplay);
   initializer.registerRpc("set_player_no_replay", rpcSetPlayerNoReplay);
   initializer.registerRpc("create_session", rpcCreateSession);
+  initializer.registerRpc("replay_match", rpcReplayMatch);
 
   return null;
 };
