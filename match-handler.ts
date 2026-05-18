@@ -146,7 +146,7 @@ function matchLoop(ctx: nkruntime.Context, logger: nkruntime.Logger, nk: nkrunti
 					true
 				);
 
-				state.exercises = getBrincaBrincaExercises();
+				state.exercises = getBrincaBrincaExercises(nk, logger);
 				state.currentMinigame = Minigames.BRINCA_BRINCA;
 				state.minigameRoundDuration = Brinca.ROUND_DURATION;
 				state.minigameIntermission = Brinca.ROUND_INTERMISSION;

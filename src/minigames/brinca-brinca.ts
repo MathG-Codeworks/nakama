@@ -37,6 +37,30 @@ const exercises : Exercise[]  = [
     }
 ];
 
-function getBrincaBrincaExercises(): Exercise[] {
+function getBrincaBrincaExercises(nk: nkruntime.Nakama, logger: nkruntime.Logger): Exercise[] {
+    try {
+        const response = nk.httpRequest(
+            GET_EXERCISES_URL.replace(":rounds", Brinca.NUMBER_OF_ROUNDS.toString()),
+            "get",
+        );
+
+        if (response.code < 200 || response.code >= 300) {
+            logger.error("Failed to fetch exercises:", response);
+            return exercises;
+        } else {
+            const exercises : Exercise[] = JSON.parse(response.body).map((exercise: any) => ({
+                operation: exercise.operation,
+                options: exercise.steps[0].options.map((option: any) => ({
+                    result: option.result,
+                    is_correct: option.isCorrect
+                }))
+
+            }));
+            return exercises;
+        }
+    } catch (error) {
+        logger.error("Error occurred while fetching exercises:", error);
+        return exercises;
+    }
     return exercises;
 }

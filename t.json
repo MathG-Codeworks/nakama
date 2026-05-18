@@ -1,0 +1,91 @@
+{
+    "minigame": 1.0,
+    "exercises": [
+        {
+            "operation": "11x - 11 = 44",
+            "options": [
+                {
+                    "result": "x = 5",
+                    "is_correct": true
+                },
+                {
+                    "result": "x = 55",
+                    "is_correct": false
+                },
+                {
+                    "result": "x = 11",
+                    "is_correct": false
+                },
+                {
+                    "result": "x = 4",
+                    "is_correct": false
+                }
+            ]
+        },
+        {
+            "operation": "7x - 14 = 42",
+            "options": [
+                {
+                    "result": "x = 8",
+                    "is_correct": true
+                },
+                {
+                    "result": "x = 56",
+                    "is_correct": false
+                },
+                {
+                    "result": "x = 7",
+                    "is_correct": false
+                },
+                {
+                    "result": "x = 14",
+                    "is_correct": false
+                }
+            ]
+        },
+        {
+            "operation": "4x + 12 = 44",
+            "options": [
+                {
+                    "result": "x = 8",
+                    "is_correct": true
+                },
+                {
+                    "result": "x = 32",
+                    "is_correct": false
+                },
+                {
+                    "result": "x = 4",
+                    "is_correct": false
+                },
+                {
+                    "result": "x = 12",
+                    "is_correct": false
+                }
+            ]
+        },
+        {
+            "operation": "10x - 20 = 60",
+            "options": [
+                {
+                    "result": "x = 8",
+                    "is_correct": true
+                },
+                {
+                    "result": "x = 80",
+                    "is_correct": false
+                },
+                {
+                    "result": "x = 10",
+                    "is_correct": false
+                },
+                {
+                    "result": "x = 20",
+                    "is_correct": false
+                }
+            ]
+        }
+    ],
+    "round_duration": 10.0,
+    "round_intermission": 5.0
+}
