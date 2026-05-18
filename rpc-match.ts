@@ -15,11 +15,11 @@ function rpcCreateMatch(ctx: nkruntime.Context, logger: nkruntime.Logger, nk: nk
             },
             JSON.stringify({
                 id: matchId,
-                code: matchCode
+                code: matchCode,
+                rounds: Brinca.NUMBER_OF_ROUNDS
             })
         );
 
-        logger.info('Match created: %s', response.body);
         createdMatch = response.body ? JSON.parse(response.body) as Match : null;
     } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);

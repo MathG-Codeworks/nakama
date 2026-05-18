@@ -3,7 +3,7 @@ const Minigames = Object.freeze({
 });
 
 const Brinca = Object.freeze({
-    ROUND_DURATION: 10,
+    ROUND_DURATION: 15,
     ROUND_INTERMISSION: 5,
     ROUND_POINTS: 10,
     NUMBER_OF_ROUNDS: 4
