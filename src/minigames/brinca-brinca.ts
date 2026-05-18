@@ -74,7 +74,7 @@ function getBrincaBrincaExercises(nk: nkruntime.Nakama, logger: nkruntime.Logger
     }
 }
 
-function saveRanking(nk: nkruntime.Nakama, logger: nkruntime.Logger, userId: string, score: number, accuracy: number, position: number, roundId: number): void {
+function saveRanking(nk: nkruntime.Nakama, logger: nkruntime.Logger, userId: number, score: number, accuracy: number, position: number, roundId: number): void {
     try {
         const response = nk.httpRequest(
             SAVE_RANKING_URL,
