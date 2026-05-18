@@ -253,6 +253,16 @@ function matchLoop(ctx: nkruntime.Context, logger: nkruntime.Logger, nk: nkrunti
 					}
 				}
 
+				saveRanking(
+					nk, 
+					logger, 
+					message.sender.userId, 
+					points, 
+					points > 0 ? 100 : 0, 
+					state.ranking.findIndex((p: PlayerScore) => p.user_id === message.sender.userId) + 1,
+					payload.roundId
+				);
+
 			} catch (error) {
 				logger.error('Error evaluating answer: %v', error);
 			}

@@ -72,5 +72,29 @@ function getBrincaBrincaExercises(nk: nkruntime.Nakama, logger: nkruntime.Logger
         logger.error("Error occurred while fetching exercises:", error);
         return exercises;
     }
-    return exercises;
+}
+
+function saveRanking(nk: nkruntime.Nakama, logger: nkruntime.Logger, userId: string, score: number, accuracy: number, position: number, roundId: number): void {
+    try {
+        const response = nk.httpRequest(
+            SAVE_RANKING_URL,
+            "post",
+            {
+                "Content-Type": "application/json"
+            },
+            JSON.stringify({
+                userId: userId,
+                score: score,
+                accuracy: accuracy,
+                position: position,
+                roundId: roundId
+            })
+        );
+
+        if (response.code < 200 || response.code >= 300) {
+            logger.error("Failed to save ranking:", response);
+        }
+    } catch (error) {
+        logger.error("Error occurred while saving ranking:", error);
+    }
 }
