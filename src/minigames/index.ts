@@ -14,3 +14,12 @@ function getPoints(minigame: number): number {
             return 0;
     }
 }
+
+function getExerciseByOperation(exercises: Exercise[], operation: string): Exercise | undefined {
+    return exercises.find(ex => ex.operation === operation);
+}
+
+function getOptionByResult(result: string, exercise?: Exercise): Option | undefined {
+    if (!exercise) return undefined;
+    return exercise.options.find(opt => opt.result === result);
+}

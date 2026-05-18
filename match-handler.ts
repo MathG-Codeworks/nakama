@@ -155,6 +155,7 @@ function matchLoop(ctx: nkruntime.Context, logger: nkruntime.Logger, nk: nkrunti
 					EXERCISES_LOADED_OP_CODE,
 					nk.stringToBinary(JSON.stringify({
 						minigame: state.currentMinigame,
+						description: state.exercises[0]?.description || '',
 						exercises: state.exercises,
 						round_duration: state.minigameRoundDuration,
 						round_intermission: state.minigameIntermission,
@@ -239,6 +240,8 @@ function matchLoop(ctx: nkruntime.Context, logger: nkruntime.Logger, nk: nkrunti
 			try {
 				const payload = JSON.parse(nk.binaryToString(message.data));
 				const points = evaluateAnswer(state.exercises, payload.operation, payload.answer, state.currentMinigame);
+				const exercise = getExerciseByOperation(state.exercises, payload.operation);
+				const option = getOptionByResult(payload.answer, exercise);
 
 				if (points > 0) {
 					const existingIndex = state.ranking.findIndex((p: PlayerScore) => p.user_id === message.sender.userId);
@@ -256,12 +259,21 @@ function matchLoop(ctx: nkruntime.Context, logger: nkruntime.Logger, nk: nkrunti
 				saveRanking(
 					nk, 
 					logger, 
-					Number(message.sender.userId), 
+					Number(payload.userId), 
 					points, 
 					points > 0 ? 100 : 0, 
 					state.ranking.findIndex((p: PlayerScore) => p.user_id === message.sender.userId) + 1,
 					payload.roundId
 				);
+
+				saveAttemp(
+					nk,
+					logger,
+					Number(payload.userId),
+					points > 0,
+					exercise ? exercise.id : 0,
+					option ? option.id : 0
+				)
 
 			} catch (error) {
 				logger.error('Error evaluating answer: %v', error);
