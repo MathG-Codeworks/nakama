@@ -431,7 +431,7 @@ function matchSignal(ctx: nkruntime.Context, logger: nkruntime.Logger, nk: nkrun
 			logger.info('Match created with code %s (via signal)', signalData.match.code);
 			dispatcher.broadcastMessage(
 				MATCH_CREATED,
-				nk.stringToBinary(JSON.stringify({ match: signalData.match })),
+				nk.stringToBinary(JSON.stringify(signalData.match)),
 				null,
 				null,
 				true
