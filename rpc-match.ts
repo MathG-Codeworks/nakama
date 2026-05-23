@@ -21,6 +21,13 @@ function rpcCreateMatch(ctx: nkruntime.Context, logger: nkruntime.Logger, nk: nk
         );
 
         createdMatch = response.body ? JSON.parse(response.body) as Match : null;
+
+        const signalData = JSON.stringify({
+            action: 'created_match',
+            match: createdMatch
+        });
+        
+        nk.matchSignal(matchId, signalData);
     } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
         logger.error('Error creating match: %s', errorMessage);

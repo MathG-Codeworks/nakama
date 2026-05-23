@@ -9,6 +9,7 @@ const GAME_START_OP_CODE = 7;
 const EXERCISES_LOADED_OP_CODE = 8;
 const EVALUATE_ANSWER_OP_CODE = 9;
 const GAME_REPLAY_OP_CODE = 10;
+const MATCH_CREATED = 13;
 
 function generatePlayerColor(): string {
 	const hue = Math.floor(Math.random() * 360);
@@ -426,7 +427,16 @@ function matchSignal(ctx: nkruntime.Context, logger: nkruntime.Logger, nk: nkrun
 					true
 				);
 			}
-		}
+		} else if (signalData.action === 'created_match') {
+			logger.info('Match created with code %s (via signal)', signalData.match.code);
+			dispatcher.broadcastMessage(
+				MATCH_CREATED,
+				nk.stringToBinary(JSON.stringify({ match: signalData.match })),
+				null,
+				null,
+				true
+			);
+		}	
 	} catch (error) {
 		logger.error('Error processing match signal: %v', error);
 	}
