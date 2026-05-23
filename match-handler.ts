@@ -64,7 +64,8 @@ function matchInit(ctx: nkruntime.Context, logger: nkruntime.Logger, nk: nkrunti
 			tickRate: 5,
 			lastCountdownTick: 0,
 			currentMinigame: null,
-			exercises: [] as any[]
+			exercises: [] as any[],
+			match: null
 		},
 		tickRate: 5,
 		label: matchCode
@@ -100,6 +101,14 @@ function matchJoin(ctx: nkruntime.Context, logger: nkruntime.Logger, nk: nkrunti
 	dispatcher.broadcastMessage(
 		RANKING_OP_CODE,
 		nk.stringToBinary(rankingData),
+		null,
+		null,
+		true
+	);
+
+	dispatcher.broadcastMessage(
+		MATCH_CREATED,
+		nk.stringToBinary(JSON.stringify(state.match)),
 		null,
 		null,
 		true
@@ -429,13 +438,7 @@ function matchSignal(ctx: nkruntime.Context, logger: nkruntime.Logger, nk: nkrun
 			}
 		} else if (signalData.action === 'created_match') {
 			logger.info('Match created with code %s (via signal)', signalData.match.code);
-			dispatcher.broadcastMessage(
-				MATCH_CREATED,
-				nk.stringToBinary(JSON.stringify(signalData.match)),
-				null,
-				null,
-				true
-			);
+			state.match = signalData.match;
 		}	
 	} catch (error) {
 		logger.error('Error processing match signal: %v', error);
